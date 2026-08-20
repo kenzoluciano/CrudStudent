@@ -58,3 +58,12 @@ export const deleteEtudiant = async (req: Request, res: Response, next: NextFunc
     next(err);
   }
 };
+
+export const getEtudiantsStats = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const stats = await etudiantsService.getEtudiantsStats();
+    res.status(200).json(stats);
+  } catch (err) {
+    next(err);
+  }
+};
