@@ -8,8 +8,11 @@ import {
   deleteEtudiant,
   getEtudiantsStats,
 } from "../controllers/etudiants.controller";
+import { authMiddleware, requireAdmin } from "../middlewares/authMiddleware";
 
 const router = Router();
+
+router.use(authMiddleware);
 
 router.get("/stats", getEtudiantsStats);
 
@@ -18,6 +21,6 @@ router.get("/:id", getEtudiantById);
 router.post("/", createEtudiant);
 router.put("/:id", updateEtudiant);
 router.patch("/:id", patchEtudiant);
-router.delete("/:id", deleteEtudiant);
+router.delete("/:id", requireAdmin, deleteEtudiant);
 
 export default router;
