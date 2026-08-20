@@ -84,3 +84,52 @@ export const deleteEtudiant = async (id: number): Promise<void> => {
     throw new AppError("Étudiant non trouvé", 404);
   }
 };
+
+export interface EtudiantsStats {
+  total: number;
+  parTrancheAge: {
+    "moins_de_18": number;
+    "18_a_25": number;
+    "26_a_35": number;
+    "plus_de_35": number;
+    "inconnu": number;
+  };
+}
+
+const calculateAge = (dateNaissance: Date): number => {
+  const today = new Date();
+  const birth = new Date(dateNaissance);
+  let age = today.getFullYear() - birth.getFullYear();
+  const hasHadBirthdayThisYear =
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+  if (!hasHadBirthdayThisYear) age--;
+  return age;
+};
+
+export const getEtudiantsStats = async (): Promise<EtudiantsStats> => {
+  const total = await etudiantsRepository.count();
+  const birthDates = await etudiantsRepository.findAllBirthDates();
+
+  const parTrancheAge = {
+    moins_de_18: 0,
+    "18_a_25": 0,
+    "26_a_35": 0,
+    plus_de_35: 0,
+    inconnu: 0,
+  };
+
+  for (const dateNaissance of birthDates) {
+    if (!dateNaissance) {
+      parTrancheAge.inconnu++;
+      continue;
+    }
+    const age = calculateAge(dateNaissance);
+    if (age < 18) parTrancheAge.moins_de_18++;
+    else if (age <= 25) parTrancheAge["18_a_25"]++;
+    else if (age <= 35) parTrancheAge["26_a_35"]++;
+    else parTrancheAge.plus_de_35++;
+  }
+
+  return { total, parTrancheAge };
+};

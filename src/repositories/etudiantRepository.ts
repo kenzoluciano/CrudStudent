@@ -56,3 +56,8 @@ export const count = async (): Promise<number> => {
   const result = await pool.query("SELECT COUNT(*) FROM etudiants");
   return parseInt(result.rows[0].count, 10);
 };
+
+export const findAllBirthDates = async (): Promise<(Date | null)[]> => {
+  const result = await pool.query("SELECT date_naissance FROM etudiants");
+  return result.rows.map((row) => row.date_naissance);
+};
